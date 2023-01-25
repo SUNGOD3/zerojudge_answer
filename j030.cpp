@@ -11,6 +11,15 @@ int main(){
 			s+=x;
 		}
 		s/=12.0;
-		(s>=1000.0)?printf("%d $%d,%.2f\n",ca,(int)s/1000,s-(int)(s/1000)*1000):printf("%d $%.2f\n",ca,s);
+		if(s>=1000.0){
+			if(s-((int)s)/1000*1000>=100)
+				printf("%d $%d,%.2f\n",ca,(int)s/1000,s-(int)(s/1000)*1000);
+			else if(s-((int)s)/1000*1000>=10)
+				printf("%d $%d,0%.2f\n",ca,(int)s/1000,s-(int)(s/1000)*1000);
+			else 
+				printf("%d $%d,00%.2f\n",ca,(int)s/1000,s-(int)(s/1000)*1000);
+		}
+		else printf("%d $%.2f\n",ca,s);
 	}
-} 
+}
+
