@@ -1,0 +1,10 @@
+#include <iostream>
+#include <map>
+using namespace std;
+map<string,int>a={{"ShunZhi", 1644} ,{"KangXi", 1662} ,{"YongZheng", 1723} ,{"QianLong", 1736} ,{"JiaQing", 1796} ,{"DaoGuang", 1821} ,{"XianFeng", 1851} ,{"TongZhi", 1862} ,{"GuangXu", 1875} ,{"XuanTong", 1909}};
+int main(){
+	string s;
+	int v;
+	cin >> s >> v;
+	cout << a[s]+v-1;
+} 
