@@ -1,0 +1,25 @@
+# _config.yml
+title: Zerojudge 解題紀錄
+description: SUNGOD 的 Zerojudge 程式解題筆記
+baseurl: "/zerojudge_answer"
+url: "https://SUNGOD3.github.io"
+
+theme: minima
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+paginate: 10
+paginate_path: "/page:num/"
+
+collections:
+  solutions:
+    output: true
+
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+      author: "SUNGOD"
