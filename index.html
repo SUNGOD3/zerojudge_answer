@@ -10,37 +10,48 @@ layout: default
   </div>
 
   <div id="problemList" class="problem-grid">
-    {% assign valid_posts = site.posts | where_exp: "post", "post.title != nil and post.title != empty and post.content != nil and post.content != empty" %}
-    {% assign total_problems = valid_posts | size %}
-    {% assign problems_per_page = 100 %}
-    {% assign total_pages = total_problems | divided_by: problems_per_page | ceil %}
-    
-    {% for post in valid_posts limit: problems_per_page offset: page %}
-      <div class="problem-card">
-        <h2>
-          <a href="{{ post.url | relative_url }}">{{ post.problem_id }} - {{ post.title }}</a>
-        </h2>
-        <div class="problem-meta">
-          <span class="post-meta">{{ post.date | date: "%Y-%m-%d" }}</span>
-          {% if post.categories %}
-            <span class="post-categories">
-              {% for category in post.categories %}
-                <span class="category">{{ category }}</span>
-              {% endfor %}
-            </span>
-          {% endif %}
+    {% raw %}{% for post in paginator.posts %}
+      {% if post.title and post.content %}
+        <div class="problem-card" data-title="{{ post.title | downcase }}">
+          <h2>
+            <a href="{{ post.url | relative_url }}">{{ post.problem_id }} - {{ post.title }}</a>
+          </h2>
+          <div class="problem-meta">
+            <span class="post-meta">{{ post.date | date: "%Y-%m-%d" }}</span>
+            {% if post.categories %}
+              <span class="post-categories">
+                {% for category in post.categories %}
+                  <span class="category">{{ category }}</span>
+                {% endfor %}
+              </span>
+            {% endif %}
+          </div>
         </div>
-      </div>
-    {% endfor %}
+      {% endif %}
+    {% endfor %}{% endraw %}
   </div>
 
+  {% raw %}{% if paginator.total_pages > 1 %}
   <div class="pagination">
     <div class="pagination-controls">
-      <button id="prevPage" class="page-button">&laquo; 上一頁</button>
-      <span id="pageInfo" class="page-info">第 1 頁，共 1 頁</span>
-      <button id="nextPage" class="page-button">下一頁 &raquo;</button>
+      {% if paginator.previous_page %}
+        <a href="{{ paginator.previous_page_path | relative_url }}" class="page-button">&laquo; 上一頁</a>
+      {% else %}
+        <span class="page-button disabled">&laquo; 上一頁</span>
+      {% endif %}
+
+      <span class="page-info">
+        第 {{ paginator.page }} 頁，共 {{ paginator.total_pages }} 頁
+      </span>
+
+      {% if paginator.next_page %}
+        <a href="{{ paginator.next_page_path | relative_url }}" class="page-button">下一頁 &raquo;</a>
+      {% else %}
+        <span class="page-button disabled">下一頁 &raquo;</span>
+      {% endif %}
     </div>
   </div>
+  {% endif %}{% endraw %}
 </div>
 
 <style>
@@ -114,82 +125,46 @@ layout: default
   border-radius: 4px;
   background: white;
   cursor: pointer;
+  text-decoration: none;
+  color: inherit;
   transition: background-color 0.2s;
 }
 
-.page-button:hover {
+.page-button:hover:not(.disabled) {
   background-color: #f0f0f0;
 }
 
-.page-button:disabled {
-  cursor: not-allowed;
+.page-button.disabled {
   opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .page-info {
   font-size: 0.9em;
   color: #666;
 }
+
+.hidden {
+  display: none !important;
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const problemCards = Array.from(document.querySelectorAll('.problem-card'));
   const searchInput = document.getElementById('searchInput');
-  const prevPageBtn = document.getElementById('prevPage');
-  const nextPageBtn = document.getElementById('nextPage');
-  const pageInfo = document.getElementById('pageInfo');
-  
-  const itemsPerPage = 100;
-  let currentPage = 1;
-  let filteredCards = [...problemCards];
+  const problemCards = document.querySelectorAll('.problem-card');
 
-  function updatePagination() {
-    const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
-    const start = (currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
+  searchInput.addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
 
-    // Hide all cards
-    problemCards.forEach(card => card.style.display = 'none');
-    
-    // Show only cards for current page
-    filteredCards.slice(start, end).forEach(card => card.style.display = '');
-
-    // Update pagination controls
-    prevPageBtn.disabled = currentPage === 1;
-    nextPageBtn.disabled = currentPage === totalPages;
-    pageInfo.textContent = `第 ${currentPage} 頁，共 ${totalPages} 頁`;
-  }
-
-  function filterCards() {
-    const searchTerm = searchInput.value.toLowerCase();
-    filteredCards = problemCards.filter(card => {
-      const title = card.querySelector('h2 a').textContent.toLowerCase();
-      return title.includes(searchTerm);
+    problemCards.forEach(card => {
+      const title = card.dataset.title;
+      if (title.includes(searchTerm)) {
+        card.classList.remove('hidden');
+      } else {
+        card.classList.add('hidden');
+      }
     });
-    currentPage = 1;
-    updatePagination();
-  }
-
-  // Event listeners
-  searchInput.addEventListener('input', filterCards);
-
-  prevPageBtn.addEventListener('click', () => {
-    if (currentPage > 1) {
-      currentPage--;
-      updatePagination();
-    }
   });
-
-  nextPageBtn.addEventListener('click', () => {
-    const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
-    if (currentPage < totalPages) {
-      currentPage++;
-      updatePagination();
-    }
-  });
-
-  // Initialize pagination
-  updatePagination();
 });
 </script>
