@@ -10,7 +10,12 @@ layout: default
   </div>
 
   <div id="problemList" class="problem-grid">
-    {% for post in site.posts %}
+    {% assign valid_posts = site.posts | where_exp: "post", "post.title != nil and post.title != empty and post.content != nil and post.content != empty" %}
+    {% assign total_problems = valid_posts | size %}
+    {% assign problems_per_page = 100 %}
+    {% assign total_pages = total_problems | divided_by: problems_per_page | ceil %}
+    
+    {% for post in valid_posts limit: problems_per_page offset: page %}
       <div class="problem-card">
         <h2>
           <a href="{{ post.url | relative_url }}">{{ post.problem_id }} - {{ post.title }}</a>
@@ -27,6 +32,14 @@ layout: default
         </div>
       </div>
     {% endfor %}
+  </div>
+
+  <div class="pagination">
+    <div class="pagination-controls">
+      <button id="prevPage" class="page-button">&laquo; 上一頁</button>
+      <span id="pageInfo" class="page-info">第 1 頁，共 1 頁</span>
+      <button id="nextPage" class="page-button">下一頁 &raquo;</button>
+    </div>
   </div>
 </div>
 
@@ -82,24 +95,101 @@ layout: default
   border-radius: 3px;
   font-size: 0.8em;
 }
+
+.pagination {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.page-button {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.page-button:hover {
+  background-color: #f0f0f0;
+}
+
+.page-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.page-info {
+  font-size: 0.9em;
+  color: #666;
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  const problemCards = Array.from(document.querySelectorAll('.problem-card'));
   const searchInput = document.getElementById('searchInput');
-  const problemCards = document.querySelectorAll('.problem-card');
+  const prevPageBtn = document.getElementById('prevPage');
+  const nextPageBtn = document.getElementById('nextPage');
+  const pageInfo = document.getElementById('pageInfo');
+  
+  const itemsPerPage = 100;
+  let currentPage = 1;
+  let filteredCards = [...problemCards];
 
-  searchInput.addEventListener('input', function(e) {
-    const searchTerm = e.target.value.toLowerCase();
+  function updatePagination() {
+    const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
 
-    problemCards.forEach(card => {
+    // Hide all cards
+    problemCards.forEach(card => card.style.display = 'none');
+    
+    // Show only cards for current page
+    filteredCards.slice(start, end).forEach(card => card.style.display = '');
+
+    // Update pagination controls
+    prevPageBtn.disabled = currentPage === 1;
+    nextPageBtn.disabled = currentPage === totalPages;
+    pageInfo.textContent = `第 ${currentPage} 頁，共 ${totalPages} 頁`;
+  }
+
+  function filterCards() {
+    const searchTerm = searchInput.value.toLowerCase();
+    filteredCards = problemCards.filter(card => {
       const title = card.querySelector('h2 a').textContent.toLowerCase();
-      if (title.includes(searchTerm)) {
-        card.style.display = '';
-      } else {
-        card.style.display = 'none';
-      }
+      return title.includes(searchTerm);
     });
+    currentPage = 1;
+    updatePagination();
+  }
+
+  // Event listeners
+  searchInput.addEventListener('input', filterCards);
+
+  prevPageBtn.addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      updatePagination();
+    }
   });
+
+  nextPageBtn.addEventListener('click', () => {
+    const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
+    if (currentPage < totalPages) {
+      currentPage++;
+      updatePagination();
+    }
+  });
+
+  // Initialize pagination
+  updatePagination();
 });
 </script>
