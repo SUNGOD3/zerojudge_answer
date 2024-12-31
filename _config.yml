@@ -1,14 +1,13 @@
 # _config.yml
 title: Zerojudge 解題紀錄
-description: SUNGOD 的 Zerojudge 程式解題筆記
-baseurl: "/zerojudge_answer"
+description: SUNGOD 的 程式解題筆記
+baseurl: ""
 url: "https://SUNGOD3.github.io"
 
 theme: minima
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
-  - jekyll-paginate
 
 paginate: 10
 paginate_path: "/page:num/"

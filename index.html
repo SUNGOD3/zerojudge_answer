@@ -1,57 +1,34 @@
+
 ---
 layout: default
 ---
 
 <div class="home">
   <h1 class="page-heading">題目列表</h1>
-  
+
   <div class="search-container">
     <input type="text" id="searchInput" placeholder="搜尋題目..." class="search-input">
   </div>
 
   <div id="problemList" class="problem-grid">
-    {% raw %}{% for post in paginator.posts %}
-      {% if post.title and post.content %}
-        <div class="problem-card" data-title="{{ post.title | downcase }}">
-          <h2>
-            <a href="{{ post.url | relative_url }}">{{ post.problem_id }} - {{ post.title }}</a>
-          </h2>
-          <div class="problem-meta">
-            <span class="post-meta">{{ post.date | date: "%Y-%m-%d" }}</span>
-            {% if post.categories %}
-              <span class="post-categories">
-                {% for category in post.categories %}
-                  <span class="category">{{ category }}</span>
-                {% endfor %}
-              </span>
-            {% endif %}
-          </div>
+    {% for post in site.posts %}
+      <div class="problem-card">
+        <h2>
+          <a href="{{ post.url | relative_url }}">{{ post.problem_id }} - {{ post.title }}</a>
+        </h2>
+        <div class="problem-meta">
+          <span class="post-meta">{{ post.date | date: "%Y-%m-%d" }}</span>
+          {% if post.categories %}
+            <span class="post-categories">
+              {% for category in post.categories %}
+                <span class="category">{{ category }}</span>
+              {% endfor %}
+            </span>
+          {% endif %}
         </div>
-      {% endif %}
-    {% endfor %}{% endraw %}
+      </div>
+    {% endfor %}
   </div>
-
-  {% raw %}{% if paginator.total_pages > 1 %}
-  <div class="pagination">
-    <div class="pagination-controls">
-      {% if paginator.previous_page %}
-        <a href="{{ paginator.previous_page_path | relative_url }}" class="page-button">&laquo; 上一頁</a>
-      {% else %}
-        <span class="page-button disabled">&laquo; 上一頁</span>
-      {% endif %}
-
-      <span class="page-info">
-        第 {{ paginator.page }} 頁，共 {{ paginator.total_pages }} 頁
-      </span>
-
-      {% if paginator.next_page %}
-        <a href="{{ paginator.next_page_path | relative_url }}" class="page-button">下一頁 &raquo;</a>
-      {% else %}
-        <span class="page-button disabled">下一頁 &raquo;</span>
-      {% endif %}
-    </div>
-  </div>
-  {% endif %}{% endraw %}
 </div>
 
 <style>
@@ -106,47 +83,6 @@ layout: default
   border-radius: 3px;
   font-size: 0.8em;
 }
-
-.pagination {
-  margin-top: 30px;
-  text-align: center;
-}
-
-.pagination-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-}
-
-.page-button {
-  padding: 8px 16px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: white;
-  cursor: pointer;
-  text-decoration: none;
-  color: inherit;
-  transition: background-color 0.2s;
-}
-
-.page-button:hover:not(.disabled) {
-  background-color: #f0f0f0;
-}
-
-.page-button.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.page-info {
-  font-size: 0.9em;
-  color: #666;
-}
-
-.hidden {
-  display: none !important;
-}
 </style>
 
 <script>
@@ -158,11 +94,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchTerm = e.target.value.toLowerCase();
 
     problemCards.forEach(card => {
-      const title = card.dataset.title;
+      const title = card.querySelector('h2 a').textContent.toLowerCase();
       if (title.includes(searchTerm)) {
-        card.classList.remove('hidden');
+        card.style.display = '';
       } else {
-        card.classList.add('hidden');
+        card.style.display = 'none';
       }
     });
   });
