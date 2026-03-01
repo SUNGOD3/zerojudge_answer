@@ -40,10 +40,18 @@ def main():
     for prob_id in process_list:
         print(f"▶ 開始處理: {prob_id}")
 
-        # 讀取本機的 C++ 程式碼
+        # 讀取本機的 C++ 程式碼 (具備多重編碼備援機制)
         cpp_path = os.path.join(RAW_DIR, f"{prob_id}.cpp")
-        with open(cpp_path, "r", encoding="utf-8") as f:
-            cpp_code = f.read()
+        try:
+            with open(cpp_path, "r", encoding="utf-8") as f:
+                cpp_code = f.read()
+        except UnicodeDecodeError:
+            try:
+                with open(cpp_path, "r", encoding="big5") as f:
+                    cpp_code = f.read()
+            except UnicodeDecodeError:
+                with open(cpp_path, "r", encoding="utf-8", errors="ignore") as f:
+                    cpp_code = f.read()
 
         # 階段 A: 執行爬蟲
         scrape_result = scrape_zerojudge(prob_id)
