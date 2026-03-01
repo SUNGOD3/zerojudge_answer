@@ -8,3 +8,4 @@ google-genai
 
 # 資料處理與輸出 report.csv
 pandas
+python-dotenv
