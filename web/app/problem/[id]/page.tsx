@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import 'highlight.js/styles/github-dark.css';
+import Comments from '../../components/Comments';
 
 export async function generateStaticParams() {
   const contentDir = path.join(process.cwd(), '../content');
@@ -54,6 +55,7 @@ export default async function ProblemPage({ params }: { params: Promise<{ id: st
             {content}
           </ReactMarkdown>
         </article>
+        <Comments />
       </div>
     </main>
   );
