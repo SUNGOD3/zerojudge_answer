@@ -2,85 +2,84 @@
 
 An automated data pipeline and static site project that transforms 1,000+ personal Accepted (AC) C++ solutions from ZeroJudge (ZJ) into a structured, easily navigable, and SEO-friendly portfolio.
 
-## What is your ZJ account?
-https://zerojudge.tw/UserStatistic?id=95834
+## Links
+- **My ZeroJudge Profile:** [UserStatistic?id=95834](https://zerojudge.tw/UserStatistic?id=95834)
+- **Live Demo:** [zerojudge-answer.vercel.app](zerojudge-answer.vercel.app) *(Note: Update this link if you deploy to Vercel instead)*
 
-## What is zerojudge?
-A website for high school students to practice program problem solving, but there are many problems in it that college don't know how to write.
+## What is ZeroJudge?
+ZeroJudge is a popular Taiwanese online judge system primarily used by high school students to practice algorithmic problem-solving. However, it contains a vast repository of problems, many of which involve complex data structures and algorithms that even college students find challenging.
 
-## Problem solving web link
-```
-https://SUNGOD3.github.io/zerojudge_answer
-```
+---
 
+## 🚀 Key Features
 
-## System Architecture
+### Frontend (User Experience)
+- **LeetCode-Style Tags & Filtering:** Automatically extracts algorithm tags (e.g., DP, DFS, Greedy) and displays top trending topics.
+- **Similar Problems Recommendation:** Calculates tag intersections to recommend the Top 4 related problems on each solution page.
+- **Advanced Search:** Supports searching by both Problem ID and Chinese Title.
+- **Optimized Reading Experience:** Features a sticky reading progress bar and one-click "Copy Code" functionality.
+- **Dark Mode:** Seamless theme switching powered by Tailwind CSS v4 and `next-themes`.
+- **High Performance:** Paginated card grid and fully pre-rendered static pages (SSG).
+
+### Backend (Data Pipeline)
+- **Robust Encoding Fallback:** Intelligently handles legacy C++ files saved in Windows `Big5` encoding, gracefully falling back to UTF-8 to prevent decode errors.
+- **AI Rate Limit Handling:** Implements exponential backoff and sleep mechanisms to safely navigate LLM API constraints (e.g., `429 Too Many Requests`).
+- **Structured Data Generation:** Prompts the LLM to generate strict YAML Frontmatter alongside Markdown content for seamless frontend parsing.
+
+---
+
+## 🏗 System Architecture
 
 This project is decoupled into two main modules: the **Backend Data Pipeline** (data extraction and content generation) and the **Frontend Static Site** (display and UI).
 
-### 1. Backend Data Pipeline (Python)
+### 1. Backend Data Pipeline (Python & Gemini API)
 Responsible for converting raw `.cpp` solution files into comprehensive `.md` (Markdown) articles.
 
 * **Scraper Module (`scraper.py`)**: 
-    * Reads `[problem_id].cpp` from the repository.
-    * Fetches problem descriptions and metadata from ZeroJudge.
-    * **Guardrails**: Implements rate limiting (randomized delays) to respect ZJ's server constraints and supports incremental scraping (only processing new files).
+    * Fetches problem descriptions and metadata directly from ZeroJudge.
+    * Validates text length to handle image/PDF-only problem statements gracefully.
 * **LLM Generator Module (`generator.py`)**: 
-    * Constructs prompts combining the ZJ problem context and the raw C++ code.
-    * Calls the LLM API to generate structured explanations, including algorithmic approaches and time/space complexity analysis.
-* **Validation Module (`validator.py`)**: The core safety net for handling bulk generation.
-    * *Scraping Validation*: Checks the length of the fetched text. If it's too short (e.g., the problem uses PDF images instead of text), it tags the file with `WARN: Missing_Text`.
-    * *Generation Validation*: Uses RegEx to ensure the LLM output contains required headers (e.g., `## Approach`, `## Complexity`). 
-    * *Output*: Generates a `report.csv` after each run, highlighting specific problem IDs that require manual review.
+    * Constructs highly constrained prompts combining the ZJ problem context and the raw C++ code.
+    * Calls the Gemini API to generate structured explanations, complexity analysis, and LeetCode-style algorithm tags in YAML Frontmatter.
+* **Controller (`main.py`)**: 
+    * Manages batch processing, incremental generation (skipping existing files), and robust error handling (API rate limiting and encoding issues).
 
-### 2. Frontend & Hosting (Next.js + React)
+### 2. Frontend & Hosting (Next.js 15 + React)
 A purely static frontend that parses the generated Markdown files and renders the user interface.
 
-* **Core Framework**: Next.js (React) with Static Site Generation (SSG). Pre-renders all 1,000+ solutions into static HTML at build time for maximum performance and SEO.
-* **Styling**: Tailwind CSS (with Dark Mode support).
-* **Third-Party Integrations**:
-    * *Comments*: Giscus (powered by GitHub Discussions).
-    * *Repository Stats*: Dynamically fetches GitHub Stars via API.
-    * *Analytics*: Vercel Web Analytics or Google Analytics.
-* **Deployment**: GitHub Pages or Vercel.
+* **Core Framework**: Next.js (App Router) with Static Site Generation (SSG). Pre-renders all 1,000+ solutions into static HTML at build time for maximum performance and SEO.
+* **Content Parsing**: Utilizes `gray-matter` for metadata extraction and `react-markdown` for code syntax highlighting.
+* **Styling**: Tailwind CSS v4.
+* **Deployment**: Automatically built and deployed via CI/CD pipelines.
 
-## Directory Structure
+---
+
+## 📁 Directory Structure
 
 ```text
 zerojudge_answer/
-├── .devcontainer/         # GitHub Codespaces configuration
 ├── .github/
-│   └── workflows/         # CI/CD pipelines (Automated generation & deployment)
+│   └── workflows/         # CI/CD pipelines (Automated generation via Actions)
 ├── scripts/               # Python data pipeline scripts
-│   ├── scraper.py
-│   ├── generator.py
-│   ├── validator.py
-│   ├── requirements.txt
-│   └── prompts/           # System prompts for the LLM
-├── answers_raw/           # Raw C++ solutions (e.g., a001.cpp)
-├── content/               # Generated Markdown files (Data source for Next.js)
-├── report.csv             # Execution status report (Ignored by Git)
-├── web/                   # Next.js frontend directory
-│   ├── pages/             # or app/ (Next.js routing)
-│   ├── components/        # Reusable React components
-│   ├── public/
+│   ├── main.py            # Pipeline controller & Batch processor
+│   ├── scraper.py         # Web scraping logic
+│   ├── generator.py       # LLM API integration & Prompt engineering
+│   └── validator.py       # Output validation
+├── answers_raw/           # Raw C++ solutions (e.g., a001.cpp, encoded in UTF-8/Big5)
+├── content/               # Generated Markdown files with YAML Frontmatter
+├── web/                   # Next.js 15 frontend directory
+│   ├── app/               # Next.js App Router (Pages, Layout, Globals)
+│   ├── components/        # Reusable React components (ProblemList, ArticleContent, etc.)
 │   ├── package.json
-│   └── next.config.js
+│   └── next.config.ts
 └── README.md              # This file
 
 ```
 
-## Development Workflow
+## 🛠 Development Workflow
 
-1. **Environment Setup**: Developed entirely within GitHub Codespaces, providing an isolated, ready-to-use Python and Node.js environment.
-2. **Daily Updates**:
-* Add new `[problem_id].cpp` files to `answers_raw/`.
-* Run `python scripts/main.py` to trigger the scraper and LLM generator.
-* Review `report.csv` to catch any parsing or generation errors.
-* (Optional) Manually tweak specific `.md` files in `content/`.
-* Commit and push to GitHub.
+1. **Add Solutions**: Drop new `[problem_id].cpp` files into `answers_raw/`.
+2. **Push to Trigger (CI/CD)**: Commit and push to the `main` branch.
+3. **Automated Pipeline**: GitHub Actions detects changes in `answers_raw/`, executes the Python pipeline to generate new `.md` files, and automatically commits them back to the repository.
+4. **Site Rebuild**: The static site hosting platform detects the new Markdown content and automatically rebuilds the frontend.
 
-
-3. **Automated Deployment**: GitHub Actions detects updates in the `content/` directory and automatically triggers a Next.js build to publish the live site.
-
-```
