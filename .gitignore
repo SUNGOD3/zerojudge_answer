@@ -3,3 +3,4 @@ _site
 Gemfile.lock.env
 report.csv
 .env
+.vscode/
