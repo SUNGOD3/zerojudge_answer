@@ -6,7 +6,6 @@ from google import genai
 load_dotenv()
 
 # 初始化新版 SDK 的 Client
-# 它會自動去環境變數中尋找 GEMINI_API_KEY
 try:
     client = genai.Client()
 except Exception as e:
@@ -14,29 +13,33 @@ except Exception as e:
 
 def generate_markdown(problem_info, cpp_code):
     """
-    將爬蟲抓到的題目資訊與 C++ 程式碼組合，請 LLM 生成 Markdown。
+    將爬蟲抓到的題目資訊與 C++ 程式碼組合，請 LLM 生成帶有 Frontmatter 的 Markdown。
     """
     if problem_info["status"] == "WARN: Missing_Text":
-         return f"# {problem_info['problem_id']} - {problem_info['title']}\n\n[🔗 前往 ZeroJudge 原題](https://zerojudge.tw/ShowProblem?problemid={problem_info['problem_id']})\n\n> ⚠️ 題目內容過短，可能是圖片或 PDF。請手動補齊。\n\n## 程式碼\n```cpp\n{cpp_code}\n```"
+         return f"---\nid: \"{problem_info['problem_id']}\"\ntitle: \"{problem_info['title']}\"\ntags: [\"未分類\"]\n---\n\n# {problem_info['problem_id']} - {problem_info['title']}\n\n[🔗 前往 ZeroJudge 原題](https://zerojudge.tw/ShowProblem?problemid={problem_info['problem_id']})\n\n> ⚠️ 題目內容過短，可能是圖片或 PDF。請手動補齊。\n\n## 程式碼\n```cpp\n{cpp_code}\n```"
 
-    # 1. 強化 Prompt：封殺廢話、禁用 LaTeX、禁止污染程式碼，並新增網址與標籤指令
+    # 1. 強化 Prompt：要求在頂部輸出 YAML Frontmatter
     prompt = f"""
     你是一個專業的 C++ 演算法工程師。請根據以下 ZeroJudge 題目與我的 AC 程式碼，撰寫一篇技術部落格文章。
     
     【絕對要求】
-    1. 嚴格禁止任何開場白、問候語或結語（例如：「好的」、「這是一篇...」）。
-    2. 必須 100% 直接從 `# ` 標題開始輸出。
-    3. 數學式與時間空間複雜度【絕對禁止】使用 LaTeX 語法 (嚴禁使用 `$` 符號包覆或 `\\max` 等語法)。請一律使用純文字或 Markdown 行內程式碼 (例如 `O(N * K)` 或 `max(f_i)`)。
-    4. 在 `## 程式碼` 區塊中，請【原封不動】地輸出我提供的 C++ 程式碼。絕對禁止在程式碼中添加任何逐行註解或修改變數名稱。所有的邏輯說明請寫在「解題思路」段落中。
-    5. 請分析題目與 C++ 程式碼，萃取 2 到 4 個 LeetCode 風格的演算法或資料結構標籤 (例如: `Hash Table`, `Dynamic Programming`, `DFS`, `Greedy`, `Two Pointers`)，並填入下方指定格式中。
+    1. 嚴格禁止任何開場白或結語。
+    2. 必須 100% 直接從 `---` (Frontmatter 邊界) 開始輸出。
+    3. 複雜度分析【絕對禁止】使用 LaTeX 語法 (嚴禁使用 `$` 符號)。請一律使用純文字或 Markdown 行內程式碼。
+    4. 程式碼區塊請原封不動輸出，禁止添加註解。
+    5. 分析題目與程式碼，萃取 2 到 4 個 LeetCode 風格的標籤 (例如: Hash Table, Dynamic Programming, DFS, Greedy)，並填入頂部的 tags 陣列中。
     
-    嚴格遵守以下的 Markdown 結構：
+    嚴格遵守以下的 Markdown 結構 (包含最頂部的 YAML Frontmatter)：
+    
+    ---
+    id: "{problem_info['problem_id']}"
+    title: "{problem_info['title']}"
+    tags: ["標籤1", "標籤2"]
+    ---
     
     # {problem_info['problem_id']} - {problem_info['title']}
 
     [🔗 前往 ZeroJudge 原題](https://zerojudge.tw/ShowProblem?problemid={problem_info['problem_id']})
-
-    **🏷️ 標籤**: `[標籤1]`, `[標籤2]`
     
     ## 題目描述
     簡述題目想要求什麼。
@@ -63,11 +66,21 @@ def generate_markdown(problem_info, cpp_code):
             contents=prompt
         )
         
-        text = response.text
+        text = response.text.strip()
         
-        # 2. 字串截斷防呆：強制找出第一個標題，把前面的廢話全刪了
-        if "# " in text:
-            text = text[text.find("# "):]
+        # 2. 字串截斷防呆：清除 LLM 有時會亂加的 ```markdown 外框，並確保從 --- 開始
+        if text.startswith("```markdown"):
+            text = text.replace("```markdown", "", 1)
+        if text.startswith("```"):
+            text = text.replace("```", "", 1)
+        if text.endswith("```"):
+            text = text[:-3]
+            
+        text = text.strip()
+        
+        # 確保文件是由 Frontmatter 開頭
+        if "---" in text and not text.startswith("---"):
+            text = text[text.find("---"):]
             
         return text
     except Exception as e:

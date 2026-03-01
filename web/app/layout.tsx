@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Analytics } from '@vercel/analytics/react';
+import { Providers } from "./providers"; // 引入我們寫好的 Provider
+import ThemeToggle from "./components/ThemeToggle"; // 引入切換按鈕
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,12 +26,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-300 dark:bg-gray-900 dark:text-gray-100`}
       >
-        {children}
-        <Analytics /> 
+        <Providers>
+          {children}
+          <ThemeToggle />
+          <Analytics /> 
+        </Providers>
       </body>
     </html>
   );
