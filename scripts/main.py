@@ -10,7 +10,7 @@ from validator import validate_markdown
 # 設定目錄路徑
 RAW_DIR = "answers_raw"
 CONTENT_DIR = "content"
-BATCH_SIZE = 3  # 測試階段先設小一點，之後可以改成 30 或 50
+BATCH_SIZE = 50  # 測試階段先設小一點，之後可以改成 30 或 50
 
 def main():
     # 確保輸出目錄存在
