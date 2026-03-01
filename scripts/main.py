@@ -66,8 +66,7 @@ def main():
             is_valid, val_msg = validate_markdown(md_content)
             final_status = val_msg
 
-        # 【關鍵防呆】：如果 LLM 回傳錯誤 (例如 429 額度用盡)，絕對不要存檔！
-        # 這樣下次執行時，這題才會再次被挑出來重試。
+        # 【關鍵防呆】：如果 LLM 回傳錯誤，絕對不要存檔！
         if md_content.startswith("ERR:") or "LLM_Failed" in final_status:
             print(f"  └─ 狀態：生成失敗 ({final_status})，將在下次執行時重試。")
             continue
@@ -79,8 +78,8 @@ def main():
 
         print(f"  └─ 狀態：{final_status}")
         
-        # 安全延遲：避免觸發 ZJ 或 API 限制 (休息 4 到 7 秒)
-        sleep_time = random.uniform(4, 7)
+        # 安全延遲：拉長基礎等待時間 (休息 8 到 12 秒)，確保不會觸發 15 RPM 限制
+        sleep_time = random.uniform(8, 12)
         print(f"  └─ 休息 {sleep_time:.1f} 秒...\n")
         time.sleep(sleep_time)
 
