@@ -39,7 +39,7 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          python scripts/main.py
+          python -u scripts/main.py
 
       # 5. 把新生成的 .md 自動 Commit 並推回倉庫
       - name: Commit and push changes
