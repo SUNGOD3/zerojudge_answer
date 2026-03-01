@@ -1,3 +1,5 @@
 script.py
 _site
-Gemfile.lock
+Gemfile.lock.env
+report.csv
+.env
