@@ -1,0 +1,57 @@
+name: Auto Generate ZJ Answers
+
+# 設定觸發條件：當 answers_raw 資料夾有變動並推送到 main 分支時，或是手動點擊按鈕時觸發
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'answers_raw/**/*.cpp'
+  workflow_dispatch:
+
+jobs:
+  build-and-generate:
+    runs-on: ubuntu-latest
+    
+    # 給予 GitHub Bot 推送 Commit 的權限
+    permissions:
+      contents: write
+
+    steps:
+      # 1. 把你的程式碼抓下來
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. 安裝 Python 環境
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # 3. 安裝我們寫在 requirements.txt 裡面的套件
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r scripts/requirements.txt
+
+      # 4. 執行 Python 腳本 (把保險箱的 API Key 拿出來用)
+      - name: Run generation script
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python scripts/main.py
+
+      # 5. 把新生成的 .md 跟 report.csv 自動 Commit 並推回倉庫
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add content/ report.csv
+          
+          # 檢查是否有檔案變動，有的話才 Commit
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "🤖 Auto-generate new ZJ answers via GitHub Actions"
+            git push
+          else
+            echo "No new files to generate."
+          fi
