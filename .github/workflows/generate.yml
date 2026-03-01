@@ -41,14 +41,13 @@ jobs:
         run: |
           python scripts/main.py
 
-      # 5. 把新生成的 .md 跟 report.csv 自動 Commit 並推回倉庫
+      # 5. 把新生成的 .md 自動 Commit 並推回倉庫
       - name: Commit and push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add content/ report.csv
+          git add content/ 
           
-          # 檢查是否有檔案變動，有的話才 Commit
           if ! git diff-index --quiet HEAD; then
             git commit -m "🤖 Auto-generate new ZJ answers via GitHub Actions"
             git push
