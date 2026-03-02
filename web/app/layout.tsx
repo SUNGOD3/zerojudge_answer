@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ZJ 題解畫廊 | SUNGOD3",
+  title: "ZJ 演算法筆記 | SUNGOD3",
   description: "自動生成的 ZeroJudge C++ 解題紀錄",
 };
 

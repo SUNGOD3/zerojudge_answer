@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@giscus/react": "^3.1.0",
+    "@upstash/redis": "^1.36.3",
     "@vercel/analytics": "^1.6.1",
     "gray-matter": "^4.0.3",
     "highlight.js": "^11.11.1",

@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import ProblemList from './components/ProblemList';
+import Leaderboard from './components/Leaderboard'; // 👈 引入排行榜元件
 
 async function getGithubStars() {
   try {
@@ -67,6 +68,9 @@ export default async function Home() {
             <span>Star {stars}</span>
           </a>
         </header>
+
+        {/* 👈 加入動態讀取的排行榜元件 */}
+        <Leaderboard />
 
         <ProblemList problems={problems} />
       </div>
