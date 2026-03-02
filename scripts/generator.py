@@ -64,9 +64,8 @@ def generate_markdown(problem_info, cpp_code):
     max_retries = 1
     for attempt in range(max_retries):
         try:
-            # ★ 關鍵修改：模型切換為 gemma-3-27b
             response = client.models.generate_content(
-                model='gemma-3-27b',
+                model='gemma-3-27b-it',
                 contents=prompt
             )
             
