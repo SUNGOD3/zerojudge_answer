@@ -4,7 +4,7 @@ An automated data pipeline and static site project that transforms 1,000+ person
 
 ## Links
 - **My ZeroJudge Profile:** [UserStatistic?id=95834](https://zerojudge.tw/UserStatistic?id=95834)
-- **Live Demo:** [zerojudge-answer.vercel.app](zerojudge-answer.vercel.app) *(Note: Update this link if you deploy to Vercel instead)*
+- **Live Demo:** [zerojudge-answer.vercel.app](https://zerojudge-answer.vercel.app/)
 
 ## What is ZeroJudge?
 ZeroJudge is a popular Taiwanese online judge system primarily used by high school students to practice algorithmic problem-solving. However, it contains a vast repository of problems, many of which involve complex data structures and algorithms that even college students find challenging.
