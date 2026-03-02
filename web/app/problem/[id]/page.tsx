@@ -42,22 +42,38 @@ export default async function ProblemPage({ params }: { params: Promise<{ id: st
   const currentTags: string[] = parsed.data.tags || [];
 
   let similarProblems: { id: string; matchCount: number }[] = [];
+  let prevId: string | null = null;
+  let nextId: string | null = null;
   
-  if (fs.existsSync(contentDir) && currentTags.length > 0) {
+  if (fs.existsSync(contentDir)) {
     const files = fs.readdirSync(contentDir);
-    similarProblems = files
-      .filter(file => file.endsWith('.md') && file !== `${id}.md`)
-      .map(file => {
-        const fPath = path.join(contentDir, file);
-        const fContent = fs.readFileSync(fPath, 'utf8');
-        const fTags: string[] = matter(fContent).data.tags || [];
-        
-        const matchCount = currentTags.filter(tag => fTags.includes(tag)).length;
-        return { id: file.replace('.md', ''), matchCount };
-      })
-      .filter(p => p.matchCount > 0)
-      .sort((a, b) => b.matchCount - a.matchCount || a.id.localeCompare(b.id))
-      .slice(0, 4);
+    
+    // 計算相似題目
+    if (currentTags.length > 0) {
+      similarProblems = files
+        .filter(file => file.endsWith('.md') && file !== `${id}.md`)
+        .map(file => {
+          const fPath = path.join(contentDir, file);
+          const fContent = fs.readFileSync(fPath, 'utf8');
+          const fTags: string[] = matter(fContent).data.tags || [];
+          
+          const matchCount = currentTags.filter(tag => fTags.includes(tag)).length;
+          return { id: file.replace('.md', ''), matchCount };
+        })
+        .filter(p => p.matchCount > 0)
+        .sort((a, b) => b.matchCount - a.matchCount || a.id.localeCompare(b.id))
+        .slice(0, 4);
+    }
+
+    // 計算上一題與下一題 (依據字典序排序)
+    const sortedFiles = files
+      .filter(f => f.endsWith('.md'))
+      .map(f => f.replace('.md', ''))
+      .sort((a, b) => a.localeCompare(b));
+    
+    const currentIndex = sortedFiles.indexOf(id);
+    if (currentIndex > 0) prevId = sortedFiles[currentIndex - 1];
+    if (currentIndex < sortedFiles.length - 1) nextId = sortedFiles[currentIndex + 1];
   }
 
   return (
@@ -101,6 +117,27 @@ export default async function ProblemPage({ params }: { params: Promise<{ id: st
             </div>
           </div>
         )}
+
+        {/* 新增的上一題 / 下一題導覽列 */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-12 mb-8 pt-8 border-t border-gray-100 dark:border-gray-700">
+          {prevId ? (
+            <Link 
+              href={`/problem/${prevId}`}
+              className="w-full sm:w-auto px-6 py-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl font-medium transition-colors text-center"
+            >
+              &larr; 上一題 <span className="uppercase text-blue-600 dark:text-blue-400 ml-1">{prevId}</span>
+            </Link>
+          ) : <div className="hidden sm:block"></div>}
+
+          {nextId ? (
+            <Link 
+              href={`/problem/${nextId}`}
+              className="w-full sm:w-auto px-6 py-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl font-medium transition-colors text-center"
+            >
+              下一題 <span className="uppercase text-blue-600 dark:text-blue-400 mr-1">{nextId}</span> &rarr;
+            </Link>
+          ) : <div className="hidden sm:block"></div>}
+        </div>
 
         <Comments />
       </div>

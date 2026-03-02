@@ -28,10 +28,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-300 dark:bg-gray-900 dark:text-gray-100`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-300 dark:bg-gray-900 dark:text-gray-100 flex flex-col min-h-screen`}
       >
         <Providers>
-          {children}
+          <div className="flex-grow">
+            {children}
+          </div>
+          {/* 加入全局 Copyright */}
+          <footer className="py-6 text-center text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 transition-colors duration-300">
+            &copy; {new Date().getFullYear()} SUNGOD. All rights reserved.
+          </footer>
           <ThemeToggle />
           <Analytics /> 
         </Providers>

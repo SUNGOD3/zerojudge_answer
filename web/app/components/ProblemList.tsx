@@ -95,14 +95,14 @@ export default function ProblemList({ problems }: { problems: { id: string; titl
             <Link 
               href={`/problem/${prob.id}`} 
               key={prob.id}
-              className="block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-500 flex flex-col justify-between group"
+              className="block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-500 flex flex-col group"
             >
               <div>
                 <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3 line-clamp-2 transition-colors">
                   <span className="text-blue-600 dark:text-blue-400 uppercase mr-2">{prob.id}</span>
                   {prob.title}
                 </h2>
-                <div className="flex flex-wrap gap-1.5 mb-4">
+                <div className="flex flex-wrap gap-1.5">
                   {prob.tags.slice(0, 3).map(tag => (
                     <span key={tag} className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded transition-colors">
                       {tag}
@@ -111,7 +111,6 @@ export default function ProblemList({ problems }: { problems: { id: string; titl
                   {prob.tags.length > 3 && <span className="text-xs px-2 py-0.5 text-gray-400 dark:text-gray-500">...</span>}
                 </div>
               </div>
-              <p className="text-gray-400 dark:text-gray-500 text-sm mt-auto group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors">查看解題思路 &rarr;</p>
             </Link>
           ))
         )}
