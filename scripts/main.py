@@ -29,11 +29,13 @@ def main():
     
     print(f"資料夾內共 {len(all_files)} 題，剩下 {len(pending_problems)} 題待處理。")
 
-    # 按照題號字母順序排序，並取出本次要處理的批次
-    process_list = sorted(pending_problems)[:BATCH_SIZE]
-    if not process_list:
+    if not pending_problems:
         print("🎉 目前沒有需要處理的題目喔！所有題目都已生成。")
         return
+
+    sample_size = min(BATCH_SIZE, len(pending_problems))
+    process_list = random.sample(pending_problems, sample_size)
+    process_list.sort()
 
     print(f"本次預計處理 {len(process_list)} 題：{process_list}\n")
 
