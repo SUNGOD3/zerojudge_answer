@@ -15,7 +15,7 @@ except Exception as e:
 def generate_markdown(problem_info, cpp_code):
     """
     將爬蟲抓到的題目資訊與 C++ 程式碼組合，請 LLM 生成帶有 Frontmatter 的 Markdown。
-    (具備遇到 429 頻率限制自動重試機制)
+    (使用 Gemma 3 27B 高額度模型)
     """
     if problem_info["status"] == "WARN: Missing_Text":
          return f"---\nid: \"{problem_info['problem_id']}\"\ntitle: \"{problem_info['title']}\"\ntags: [\"未分類\"]\n---\n\n# {problem_info['problem_id']} - {problem_info['title']}\n\n[🔗 前往 ZeroJudge 原題](https://zerojudge.tw/ShowProblem?problemid={problem_info['problem_id']})\n\n> ⚠️ 題目內容過短，可能是圖片或 PDF。請手動補齊。\n\n## 程式碼\n```cpp\n{cpp_code}\n```"
@@ -61,16 +61,18 @@ def generate_markdown(problem_info, cpp_code):
     {problem_info['content']}
     """
 
-    max_retries = 3
+    max_retries = 1
     for attempt in range(max_retries):
         try:
+            # ★ 關鍵修改：模型切換為 gemma-3-27b
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemma-3-27b',
                 contents=prompt
             )
             
             text = response.text.strip()
             
+            # 清除 Markdown 外框
             if text.startswith("```markdown"):
                 text = text.replace("```markdown", "", 1)
             if text.startswith("```"):
@@ -87,20 +89,18 @@ def generate_markdown(problem_info, cpp_code):
             
         except Exception as e:
             error_msg = str(e)
-            # 判斷是否為頻率限制 (429)
             if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
-                wait_time = 60 # 強制冷卻 1 分鐘
+                # ★ 關鍵修改：因為 RPM 有 30 次，冷卻時間下修到 15 秒即可
+                wait_time = 15 
                 print(f"\n    ⚠️ 觸發 API 頻率限制！(第 {attempt + 1}/{max_retries} 次嘗試)")
                 print(f"    💤 程式將進入冷卻睡眠 {wait_time} 秒...")
                 time.sleep(wait_time)
             else:
-                # 其他不可預期的錯誤，直接回傳失敗
                 print(f"LLM 發生錯誤: {e}")
                 return f"ERR: LLM_Failed\n\n{e}"
                 
     return "ERR: LLM_Failed\n\n連續多次觸發 429 限制，自動放棄該題。"
 
-# 簡易測試區塊
 if __name__ == "__main__":
     test_info = {
         "problem_id": "a001",
