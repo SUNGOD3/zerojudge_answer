@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     
     if (!id) return NextResponse.json({ error: '缺少題目 ID' }, { status: 400 });
 
-    // 💡 關鍵魔法：使用 Pipeline 一次執行兩個動作
+    // 使用 Pipeline 一次執行兩個動作
     const pipeline = redis.pipeline();
     pipeline.incr(`views:${id}`); // 單題計數器 +1
     pipeline.zincrby('leaderboard:views', 1, id); // 排行榜總分 +1

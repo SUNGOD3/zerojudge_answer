@@ -6,7 +6,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // 你的 Vercel 部署網址
   const baseUrl = 'https://zerojudge-answer.vercel.app';
 
-  // 1. 加入首頁 (權重最高)
+  // 加入首頁 (權重最高)
   const routes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
@@ -16,7 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // 2. 自動掃描 content 資料夾，將每一題加入 sitemap
+  // 自動掃描 content 資料夾，將每一題加入 sitemap
   const contentDir = path.join(process.cwd(), '../content');
   
   if (fs.existsSync(contentDir)) {

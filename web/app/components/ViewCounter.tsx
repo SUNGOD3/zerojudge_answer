@@ -13,11 +13,10 @@ export default function ViewCounter({ id }: { id: string }) {
 
     const fetchViews = async () => {
       try {
-        // 去瀏覽器記憶體檢查：這個人剛才有沒有看過這題了？
+        // 去瀏覽器記憶體檢查
         const hasViewed = sessionStorage.getItem(`viewed_${id}`);
 
         if (hasViewed) {
-          // 已經看過了，乖乖用 GET 拿數字就好，不要 +1
           const res = await fetch(`/api/views?id=${id}`);
           const data = await res.json();
           if (data.views !== undefined) setViews(data.views);
@@ -31,7 +30,7 @@ export default function ViewCounter({ id }: { id: string }) {
           const data = await res.json();
           if (data.views !== undefined) {
             setViews(data.views);
-            // 寫入記憶體，發給他一張「已觀看」的通行證
+            // 寫入記憶體 *已觀看
             sessionStorage.setItem(`viewed_${id}`, "true");
           }
         }

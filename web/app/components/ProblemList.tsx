@@ -6,7 +6,7 @@ import Link from 'next/link';
 const ITEMS_PER_PAGE = 24;
 const MAX_TAGS_TO_SHOW = 15;
 
-// 🌟 新增：排序選項與資料結構
+//排序選項與資料結構
 type SortOption = 'id' | 'views' | 'likes' | 'approval';
 type StatsMap = Record<string, { views: number; likes: number; dislikes: number; approvalRate: number }>;
 
@@ -17,12 +17,12 @@ export default function ProblemList({ problems }: { problems: { id: string; titl
   const [isTagsExpanded, setIsTagsExpanded] = useState(false);
   const [jumpInput, setJumpInput] = useState('');
 
-  // 🌟 新增：動態數據狀態
+  //動態數據狀態
   const [statsMap, setStatsMap] = useState<StatsMap>({});
   const [sortBy, setSortBy] = useState<SortOption>('id');
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
-  // 🌟 新增：元件載入時，批次向 Redis 索取所有題目的數據
+  //元件載入時，批次向 Redis 索取所有題目的數據
   useEffect(() => {
     const fetchAllStats = async () => {
       try {
@@ -91,7 +91,7 @@ export default function ProblemList({ problems }: { problems: { id: string; titl
     }
   };
 
-  // 🌟 升級：過濾完畢後，根據所選的 sortBy 進行動態排序
+  //過濾完畢後，根據所選的 sortBy 進行動態排序
   const filteredAndSortedProblems = useMemo(() => {
     let result = problems.filter(prob => {
       const query = searchQuery.toLowerCase();
@@ -125,7 +125,7 @@ export default function ProblemList({ problems }: { problems: { id: string; titl
 
   return (
     <div>
-      {/* 🌟 升級：搜尋列與排序下拉選單並排 */}
+      {/*搜尋列與排序下拉選單並排 */}
       <div className="mb-8 flex flex-col md:flex-row gap-4 relative">
         <div className="relative flex-grow">
           <input
@@ -194,7 +194,7 @@ export default function ProblemList({ problems }: { problems: { id: string; titl
           <p className="text-gray-500 dark:text-gray-400 col-span-full">找不到符合條件的題目 🥲</p>
         ) : (
           currentProblems.map((prob) => {
-            // 🌟 獲取該題的統計資料
+            //獲取該題的統計資料
             const stats = statsMap[prob.id];
 
             return (
@@ -218,7 +218,7 @@ export default function ProblemList({ problems }: { problems: { id: string; titl
                   </div>
                 </div>
 
-                {/* 🌟 升級：卡片底部顯示觀看數、讚數、好評度 */}
+                {/*卡片底部顯示觀看數、讚數、好評度 */}
                 <div className="pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                   {isLoadingStats ? (
                     <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-4 w-full rounded"></div>

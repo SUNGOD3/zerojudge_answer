@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import ProblemList from './components/ProblemList';
-import Leaderboard from './components/Leaderboard'; // 👈 引入排行榜元件
+import Leaderboard from './components/Leaderboard';
 
 async function getGithubStars() {
   try {
@@ -51,7 +51,7 @@ export default async function Home() {
               SUNGOD 的 ZJ 演算法筆記
             </h1>
             <p className="text-gray-600 dark:text-gray-400 transition-colors mb-4">
-              收錄個人在 ZeroJudge 上的 C++ AC 程式碼。
+              收錄個人在 ZeroJudge 上的程式碼。
             </p>
             <div className="inline-block bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700/50 rounded-lg p-3 text-sm text-yellow-800 dark:text-yellow-200">
               💡 <strong>誠實聲明：</strong> 本站的「解題思路」與「複雜度分析」皆為提供 AC 程式碼後，由 AI 自動生成。如果出現邏輯怪異、說明很爛或幻覺發生，純屬正常現象，請斟酌參考！
@@ -69,7 +69,6 @@ export default async function Home() {
           </a>
         </header>
 
-        {/* 👈 加入動態讀取的排行榜元件 */}
         <Leaderboard />
 
         <ProblemList problems={problems} />

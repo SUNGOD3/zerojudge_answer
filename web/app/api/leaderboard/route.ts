@@ -11,7 +11,7 @@ export async function GET() {
     const rawLeaderboard = await redis.zrange('leaderboard:views', 0, 4, { rev: true, withScores: true });
     
     // Upstash Redis 回傳的格式通常是一維陣列：["a001", 15, "a002", 10, ...]
-    // 我們把它轉換成前端好用的物件陣列：[{ id: "a001", views: 15 }, ...]
+    // 轉換成前端好用的物件陣列：[{ id: "a001", views: 15 }, ...]
     const leaderboard = [];
     for (let i = 0; i < rawLeaderboard.length; i += 2) {
       leaderboard.push({

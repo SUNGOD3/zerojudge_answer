@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     const likesKeys = ids.map(id => `likes:${id}`);
     const dislikesKeys = ids.map(id => `dislikes:${id}`);
 
-    // 平行發送 3 個 MGET 請求給 Redis，極致榨出效能
+    // 平行發送 3 個 MGET 請求給 Redis
     const [viewsData, likesData, dislikesData] = await Promise.all([
       redis.mget<number[]>(...viewsKeys),
       redis.mget<number[]>(...likesKeys),

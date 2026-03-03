@@ -7,7 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    // 主動告訴爬蟲你的 Sitemap 在哪裡
     sitemap: 'https://zerojudge-answer.vercel.app/sitemap.xml',
   };
 }

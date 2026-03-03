@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Analytics } from '@vercel/analytics/react';
-import { Providers } from "./providers"; // 引入我們寫好的 Provider
-import ThemeToggle from "./components/ThemeToggle"; // 引入切換按鈕
+import { Analytics } from '@vercel/analytics/next';
+import { Providers } from "./providers";
+import ThemeToggle from "./components/ThemeToggle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "ZJ 演算法筆記 | SUNGOD3",
-  description: "自動生成的 ZeroJudge C++ 解題紀錄",
+  description: "自動生成的 ZeroJudge 解題紀錄",
 };
 
 export default function RootLayout({
@@ -34,7 +34,6 @@ export default function RootLayout({
           <div className="flex-grow">
             {children}
           </div>
-          {/* 加入全局 Copyright */}
           <footer className="py-6 text-center text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 transition-colors duration-300">
             &copy; {new Date().getFullYear()} SUNGOD. All rights reserved.
           </footer>
