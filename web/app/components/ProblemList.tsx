@@ -10,8 +10,11 @@ export default function ProblemList({ problems }: { problems: { id: string; titl
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isTagsExpanded, setIsTagsExpanded] = useState(false); // 👈 新增：控制標籤是否展開
+  const [jumpInput, setJumpInput] = useState(''); // 👈 新增：控制頁碼跳轉的輸入框
 
-  const topTags = useMemo(() => {
+  // 1. 取得所有標籤 (不再硬切前 15 個)
+  const allTags = useMemo(() => {
     const tagCounts: Record<string, number> = {};
     problems.forEach(p => {
       p.tags.forEach(t => {
@@ -19,12 +22,13 @@ export default function ProblemList({ problems }: { problems: { id: string; titl
       });
     });
 
-    const sortedTags = Object.entries(tagCounts)
+    return Object.entries(tagCounts)
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .map(entry => ({ name: entry[0], count: entry[1] }));
-
-    return sortedTags.slice(0, MAX_TAGS_TO_SHOW);
   }, [problems]);
+
+  // 決定畫面上要顯示哪些標籤
+  const displayedTags = isTagsExpanded ? allTags : allTags.slice(0, MAX_TAGS_TO_SHOW);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -36,11 +40,25 @@ export default function ProblemList({ problems }: { problems: { id: string; titl
     setCurrentPage(1);
   };
 
+  // 👈 新增：處理頁碼跳轉 (按 Enter 觸發)
+  const handleJump = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      const page = parseInt(jumpInput);
+      if (!isNaN(page) && page >= 1 && page <= totalPages) {
+        setCurrentPage(page);
+        setJumpInput(''); // 跳轉後清空輸入框
+      }
+    }
+  };
+
   const filteredProblems = useMemo(() => {
     return problems.filter(prob => {
       const query = searchQuery.toLowerCase();
+      // 2. 👈 新增：搜尋邏輯加入 tags 的比對
       const matchSearch = prob.id.toLowerCase().includes(query) || 
-                          prob.title.toLowerCase().includes(query);
+                          prob.title.toLowerCase().includes(query) ||
+                          prob.tags.some(tag => tag.toLowerCase().includes(query));
+      
       const matchTag = selectedTag ? prob.tags.includes(selectedTag) : true;
       return matchSearch && matchTag;
     });
@@ -55,7 +73,7 @@ export default function ProblemList({ problems }: { problems: { id: string; titl
       <div className="mb-8 relative">
         <input
           type="text"
-          placeholder="搜尋題號或題目名稱 (例如 a002 或 簡易加法)..."
+          placeholder="搜尋題號、題目名稱，或標籤 (例如 DP、Greedy)..."
           className="w-full sm:max-w-md pl-4 pr-10 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all"
           value={searchQuery}
           onChange={handleSearch}
@@ -68,10 +86,10 @@ export default function ProblemList({ problems }: { problems: { id: string; titl
         </svg>
       </div>
 
-      {topTags.length > 0 && (
+      {allTags.length > 0 && (
         <div className="mb-8 flex flex-wrap gap-2 items-center">
           <span className="text-sm font-bold text-gray-500 dark:text-gray-400 mr-2">熱門考點：</span>
-          {topTags.map(({ name, count }) => (
+          {displayedTags.map(({ name, count }) => (
             <button
               key={name}
               onClick={() => handleTagClick(name)}
@@ -84,6 +102,16 @@ export default function ProblemList({ problems }: { problems: { id: string; titl
               # {name} <span className="ml-1 text-xs opacity-60">({count})</span>
             </button>
           ))}
+          
+          {/* 3. 👈 新增：展開/收合按鈕 */}
+          {allTags.length > MAX_TAGS_TO_SHOW && (
+            <button
+              onClick={() => setIsTagsExpanded(!isTagsExpanded)}
+              className="px-3 py-1.5 rounded-lg text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all underline decoration-dashed underline-offset-4 ml-1"
+            >
+              {isTagsExpanded ? '收合標籤 ▲' : `顯示全部 (${allTags.length}) ▼`}
+            </button>
+          )}
         </div>
       )}
 
@@ -117,7 +145,7 @@ export default function ProblemList({ problems }: { problems: { id: string; titl
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4 mt-8 pt-6 border-t border-gray-200 dark:border-gray-800">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8 pt-6 border-t border-gray-200 dark:border-gray-800">
           <button
             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
@@ -126,9 +154,26 @@ export default function ProblemList({ problems }: { problems: { id: string; titl
             上一頁
           </button>
           
-          <span className="text-gray-600 dark:text-gray-400 font-medium">
-            第 {currentPage} 頁 / 共 {totalPages} 頁
-          </span>
+          {/* 4. 👈 升級：頁碼顯示與跳轉輸入框 */}
+          <div className="flex items-center gap-3">
+            <span className="text-gray-600 dark:text-gray-400 font-medium whitespace-nowrap">
+              第 {currentPage} 頁 / 共 {totalPages} 頁
+            </span>
+            <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-gray-300 dark:border-gray-700">
+              <span className="text-sm text-gray-500 dark:text-gray-400">跳至</span>
+              <input
+                type="number"
+                min={1}
+                max={totalPages}
+                value={jumpInput}
+                onChange={(e) => setJumpInput(e.target.value)}
+                onKeyDown={handleJump}
+                className="w-16 px-2 py-1 text-center rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-colors"
+                placeholder="頁碼"
+              />
+              <span className="text-sm text-gray-500 dark:text-gray-400">頁 (按 Enter)</span>
+            </div>
+          </div>
 
           <button
             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
