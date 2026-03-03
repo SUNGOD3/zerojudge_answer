@@ -5,6 +5,7 @@ import matter from 'gray-matter';
 import Comments from '../../components/Comments';
 import ArticleContent from '../../components/ArticleContent';
 import ViewCounter from '../../components/ViewCounter';
+import VoteButtons from '../../components/VoteButtons'; // 👈 引入投票元件
 
 export async function generateStaticParams() {
   const contentDir = path.join(process.cwd(), '../content');
@@ -80,11 +81,16 @@ export default async function ProblemPage({ params }: { params: Promise<{ id: st
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 py-10 px-4 sm:px-8 font-sans relative transition-colors duration-300">
       <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 p-8 sm:p-12 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors duration-300">
-        <div className="flex justify-between items-center mb-8">
-          <Link href="/" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium mb-8 inline-block transition-colors">
+        
+        {/* 👈 修改這裡：將返回按鈕、投票按鈕與觀看次數並排 */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <Link href="/" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium inline-block transition-colors">
             &larr; 返回題庫列表
           </Link>
-          <ViewCounter id={id} />
+          <div className="flex flex-wrap items-center gap-4">
+            <VoteButtons id={id} />
+            <ViewCounter id={id} />
+          </div>
         </div>
         
         {currentTags.length > 0 && (
