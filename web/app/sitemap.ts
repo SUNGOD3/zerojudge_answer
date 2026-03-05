@@ -2,6 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import { MetadataRoute } from 'next';
 
+//強制 Next.js 在打包 (Build) 階段就執行這支檔案。這樣能保證讀取得到外層的 ../content 資料夾，並直接產生純靜態的 XML。
+export const dynamic = 'force-static';
+
 export default function sitemap(): MetadataRoute.Sitemap {
   // 你的 Vercel 部署網址
   const baseUrl = 'https://zerojudge-answer.vercel.app';
@@ -10,7 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const routes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
-      lastModified: new Date(),
+      lastModified: new Date().toISOString(),
       changeFrequency: 'daily',
       priority: 1.0,
     },
@@ -32,7 +35,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         
         routes.push({
           url: `${baseUrl}/problem/${id}`,
-          lastModified: stats.mtime,
+          lastModified: stats.mtime.toISOString(),
           changeFrequency: 'weekly',
           priority: 0.8, // 內頁的權重稍微低於首頁
         });
