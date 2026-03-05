@@ -2,10 +2,42 @@ import fs from 'fs';
 import path from 'path';
 import Link from 'next/link';
 import matter from 'gray-matter';
+import { Metadata } from 'next';
 import Comments from '../../components/Comments';
 import ArticleContent from '../../components/ArticleContent';
 import ViewCounter from '../../components/ViewCounter';
 import VoteButtons from '../../components/VoteButtons';
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
+  
+  const contentDir = path.join(process.cwd(), '../content');
+  const filePath = path.join(contentDir, `${id}.md`);
+  
+  try {
+    const rawContent = fs.readFileSync(filePath, 'utf8');
+    const { data } = matter(rawContent);
+    const title = data.title || '未知題目';
+    const tags = data.tags || [];
+    const tagsString = tags.length > 0 ? tags.join(', ') : 'C++';
+    const upperId = id.toUpperCase();
+
+    return {
+      title: `${upperId}: ${title} - ZeroJudge C++ 解題思路`,
+      description: `提供 ZeroJudge ${upperId} ${title} 的 C++ AC 程式碼，包含 AI 自動生成的詳細解題思路與複雜度分析。相關考點：${tagsString}。`,
+      keywords: ['ZeroJudge', 'C++', '演算法', '解題', upperId, title, ...tags],
+      openGraph: {
+        title: `${upperId}: ${title} | SUNGOD 的 ZJ 筆記`,
+        description: `查看 ${upperId} 的 C++ 解法與思路分析。`,
+      }
+    };
+  } catch (e) {
+    return {
+      title: `找不到題目 ${id} | SUNGOD3`,
+    };
+  }
+}
 
 export async function generateStaticParams() {
   const contentDir = path.join(process.cwd(), '../content');
