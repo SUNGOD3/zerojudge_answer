@@ -34,10 +34,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
         const stats = fs.statSync(filePath);
         
         routes.push({
-          url: `${baseUrl}/problem/${id}`,
+          url: `${baseUrl}/problem/${encodeURIComponent(id)}`,
           lastModified: stats.mtime.toISOString(),
           changeFrequency: 'weekly',
-          priority: 0.8, // 內頁的權重稍微低於首頁
+          priority: 0.8,
         });
       });
   }
